@@ -3,8 +3,6 @@ import torch.nn as nn
 from torch.nn import functional as F
 from vasnet_model import SelfAttention
 
-__all__ = ['DSN']
-
 class DSN(nn.Module):
     """Deep Summarization Network"""
     def __init__(self, in_dim=1024, hid_dim=256, num_layers=1, cell='lstm'):

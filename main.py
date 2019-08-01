@@ -29,7 +29,7 @@ parser.add_argument('-m', '--metric', type=str, required=True, choices=['tvsum',
                     help="evaluation metric ['tvsum', 'summe']")
 # Model options
 parser.add_argument('--input-dim', type=int, default=1024, help="input dimension (default: 1024)")
-parser.add_argument('--hidden-dim', type=int, default=256, help="hidden unit dimension of DSN (default: 256)")
+parser.add_argument('--hidden-dim', type=int, default=1024, help="hidden unit dimension of DSN (default: 256)")
 parser.add_argument('--num-layers', type=int, default=1, help="number of RNN layers (default: 1)")
 parser.add_argument('--rnn-cell', type=str, default='lstm', help="RNN cell type (default: lstm)")
 # Optimization options
@@ -83,7 +83,8 @@ def main():
 
     print("Initialize model")
     model = DSN(in_dim=args.input_dim, hid_dim=args.hidden_dim, num_layers=args.num_layers, cell=args.rnn_cell)
-    model = VASNet(in_dim = args.input_dim,out_dim = args.hidden_dim)
+    # model = VASNet(in_dim = args.input_dim,out_dim = args.hidden_dim)
+    model = VASNet()
     print("Model size: {:.5f}M".format(sum(p.numel() for p in model.parameters())/1000000.0))
 
     optimizer = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
