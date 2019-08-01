@@ -15,6 +15,8 @@ import torch.backends.cudnn as cudnn
 from torch.optim import lr_scheduler
 from torch.distributions import Bernoulli
 
+import atexit
+
 from utils import Logger, read_json, write_json, save_checkpoint
 from models import *
 from rewards import compute_reward
@@ -29,7 +31,7 @@ parser.add_argument('-m', '--metric', type=str, required=True, choices=['tvsum',
                     help="evaluation metric ['tvsum', 'summe']")
 # Model options
 parser.add_argument('--input-dim', type=int, default=1024, help="input dimension (default: 1024)")
-parser.add_argument('--hidden-dim', type=int, default=1024, help="hidden unit dimension of DSN (default: 256)")
+parser.add_argument('--hidden-dim', type=int, default=256, help="hidden unit dimension of DSN (default: 256)")
 parser.add_argument('--num-layers', type=int, default=1, help="number of RNN layers (default: 1)")
 parser.add_argument('--rnn-cell', type=str, default='lstm', help="RNN cell type (default: lstm)")
 # Optimization options
@@ -78,13 +80,11 @@ def main():
     assert args.split_id < len(splits), "split_id (got {}) exceeds {}".format(args.split_id, len(splits))
     split = splits[args.split_id]
     train_keys = split['train_keys']
-     test_keys = split[ 'test_keys']
+    test_keys = split['test_keys']
     print("# total videos {}. # train videos {}. # test videos {}".format(num_videos, len(train_keys), len(test_keys)))
 
     print("Initialize model")
     model = DSN(in_dim=args.input_dim, hid_dim=args.hidden_dim, num_layers=args.num_layers, cell=args.rnn_cell)
-    # model = VASNet(in_dim = args.input_dim,out_dim = args.hidden_dim)
-    model = VASNet()
     print("Model size: {:.5f}M".format(sum(p.numel() for p in model.parameters())/1000000.0))
 
     optimizer = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
@@ -111,6 +111,19 @@ def main():
     model.train()
     baselines = {key: 0. for key in train_keys} # baseline rewards for videos
     reward_writers = {key: [] for key in train_keys} # record reward changes for each video
+    
+    @atexit.register
+    def exit_func():
+        elapsed = round(time.time() - start_time)
+        elapsed = str(datetime.timedelta(seconds=elapsed))
+        print("Finished. Total elapsed time (h:m:s): {}".format(elapsed))
+
+        model_state_dict = model.module.state_dict() if use_gpu else model.state_dict()
+        model_save_path = osp.join(args.save_dir, 'model_epoch' + str(args.max_epoch) + '.pth.tar')
+        save_checkpoint(model_state_dict, model_save_path)
+        print("Model saved to {}".format(model_save_path))
+
+        dataset.close()
 
     for epoch in range(start_epoch, args.max_epoch):
         idxs = np.arange(len(train_keys))
@@ -144,19 +157,11 @@ def main():
         epoch_reward = np.mean([reward_writers[key][epoch] for key in train_keys])
         print("epoch {}/{}\t reward {}\t".format(epoch+1, args.max_epoch, epoch_reward))
 
+
     write_json(reward_writers, osp.join(args.save_dir, 'rewards.json'))
     evaluate(model, dataset, test_keys, use_gpu)
 
-    elapsed = round(time.time() - start_time)
-    elapsed = str(datetime.timedelta(seconds=elapsed))
-    print("Finished. Total elapsed time (h:m:s): {}".format(elapsed))
 
-    model_state_dict = model.module.state_dict() if use_gpu else model.state_dict()
-    model_save_path = osp.join(args.save_dir, 'model_epoch' + str(args.max_epoch) + '.pth.tar')
-    save_checkpoint(model_state_dict, model_save_path)
-    print("Model saved to {}".format(model_save_path))
-
-    dataset.close()
 
 def evaluate(model, dataset, test_keys, use_gpu):
     print("==> Test")
