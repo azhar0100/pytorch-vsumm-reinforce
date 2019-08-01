@@ -15,6 +15,8 @@ import torch.backends.cudnn as cudnn
 from torch.optim import lr_scheduler
 from torch.distributions import Bernoulli
 
+import atexit
+
 from utils import Logger, read_json, write_json, save_checkpoint
 from models import *
 from rewards import compute_reward
@@ -109,6 +111,19 @@ def main():
     model.train()
     baselines = {key: 0. for key in train_keys} # baseline rewards for videos
     reward_writers = {key: [] for key in train_keys} # record reward changes for each video
+    
+    @atexit.register
+    def exit_func():
+        elapsed = round(time.time() - start_time)
+        elapsed = str(datetime.timedelta(seconds=elapsed))
+        print("Finished. Total elapsed time (h:m:s): {}".format(elapsed))
+
+        model_state_dict = model.module.state_dict() if use_gpu else model.state_dict()
+        model_save_path = osp.join(args.save_dir, 'model_epoch' + str(args.max_epoch) + '.pth.tar')
+        save_checkpoint(model_state_dict, model_save_path)
+        print("Model saved to {}".format(model_save_path))
+
+        dataset.close()
 
     for epoch in range(start_epoch, args.max_epoch):
         idxs = np.arange(len(train_keys))
@@ -142,19 +157,11 @@ def main():
         epoch_reward = np.mean([reward_writers[key][epoch] for key in train_keys])
         print("epoch {}/{}\t reward {}\t".format(epoch+1, args.max_epoch, epoch_reward))
 
+
     write_json(reward_writers, osp.join(args.save_dir, 'rewards.json'))
     evaluate(model, dataset, test_keys, use_gpu)
 
-    elapsed = round(time.time() - start_time)
-    elapsed = str(datetime.timedelta(seconds=elapsed))
-    print("Finished. Total elapsed time (h:m:s): {}".format(elapsed))
 
-    model_state_dict = model.module.state_dict() if use_gpu else model.state_dict()
-    model_save_path = osp.join(args.save_dir, 'model_epoch' + str(args.max_epoch) + '.pth.tar')
-    save_checkpoint(model_state_dict, model_save_path)
-    print("Model saved to {}".format(model_save_path))
-
-    dataset.close()
 
 def evaluate(model, dataset, test_keys, use_gpu):
     print("==> Test")
