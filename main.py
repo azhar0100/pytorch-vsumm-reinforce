@@ -164,6 +164,7 @@ def main():
             # pass
 
 
+
     write_json(reward_writers, osp.join(args.save_dir, 'rewards.json'))
     evaluate(model, dataset, test_keys, use_gpu)
 
