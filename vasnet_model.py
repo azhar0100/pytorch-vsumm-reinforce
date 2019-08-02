@@ -73,8 +73,8 @@ class VASNet(nn.Module):
 
         self.att = SelfAttention(input_size=self.m, output_size=self.m)
         self.ka = nn.Linear(in_features=self.m, out_features=1024)
-        self.kb = nn.Linear(in_features=self.ka.out_features, out_features=1024)
-        self.kc = nn.Linear(in_features=self.kb.out_features, out_features=1024)
+        # self.kb = nn.Linear(in_features=self.ka.out_features, out_features=1024)
+        # self.kc = nn.Linear(in_features=self.kb.out_features, out_features=1024)
         self.kd = nn.Linear(in_features=self.ka.out_features, out_features=1)
 
         self.sig = nn.Sigmoid()
