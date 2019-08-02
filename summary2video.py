@@ -37,7 +37,7 @@ if __name__ == '__main__':
         (args.width, args.height),
     )
     h5_res = h5py.File(args.path, 'r')
-    key = h5_res.keys()[args.idx]
+    key = list(h5_res.keys())[args.idx]
     summary = h5_res[key]['machine_summary'][...]
     h5_res.close()
     frm2video(args.frm_dir, summary, vid_writer)

@@ -21,7 +21,7 @@ parser.add_argument('-i', '--idx', type=int, default=0, help="choose which video
 args = parser.parse_args()
 
 reward_writers = read_json(args.path)
-keys = reward_writers.keys()
+keys = list(reward_writers.keys())
 assert args.idx < len(keys)
 key = keys[args.idx]
 rewards = reward_writers[key]

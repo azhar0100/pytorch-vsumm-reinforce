@@ -8,7 +8,7 @@ import time
 import datetime
 import numpy as np
 from tabulate import tabulate
-
+import re
 import torch
 import torch.nn as nn
 import torch.backends.cudnn as cudnn
@@ -95,6 +95,8 @@ def main():
         print("Loading checkpoint from '{}'".format(args.resume))
         checkpoint = torch.load(args.resume)
         model.load_state_dict(checkpoint)
+        start_epoch = int(re.search(r'.*([0-9]+)\.pth\.tar.*',args.resume).group(1)) - 1
+
     else:
         start_epoch = 0
 
@@ -154,8 +156,12 @@ def main():
             baselines[key] = 0.9 * baselines[key] + 0.1 * np.mean(epis_rewards) # update baseline reward via moving average
             reward_writers[key].append(np.mean(epis_rewards))
 
+        # try:
         epoch_reward = np.mean([reward_writers[key][epoch] for key in train_keys])
         print("epoch {}/{}\t reward {}\t".format(epoch+1, args.max_epoch, epoch_reward))
+        # except:
+            # print("The weird exception was encountered")
+            # pass
 
 
     write_json(reward_writers, osp.join(args.save_dir, 'rewards.json'))
