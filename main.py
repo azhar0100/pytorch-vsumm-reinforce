@@ -22,6 +22,8 @@ from models import *
 from rewards import compute_reward
 import vsum_tools
 
+from vasnet_model import VASNet
+
 parser = argparse.ArgumentParser("Pytorch code for unsupervised video summarization with REINFORCE")
 # Dataset options
 parser.add_argument('-d', '--dataset', type=str, required=True, help="path to h5 dataset (required)")
@@ -85,6 +87,7 @@ def main():
 
     print("Initialize model")
     model = DSN(in_dim=args.input_dim, hid_dim=args.hidden_dim, num_layers=args.num_layers, cell=args.rnn_cell)
+    model = VASNet()
     print("Model size: {:.5f}M".format(sum(p.numel() for p in model.parameters())/1000000.0))
 
     optimizer = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
