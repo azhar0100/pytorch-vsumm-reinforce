@@ -150,6 +150,7 @@ def othermain():
         dataset = d['dataset']
         d['num_videos'] = len(dataset.keys())
         d['splits'] = read_json(args.dataset_dir + file_dict[abbrev_to_name[i]] + ".json")
+        splits = d['splits']
         assert args.split_id < len(splits), "split_id (got {}) exceeds {}".format(args.split_id, len(splits))
         d['split'] = splits[args.split_id]
         d['train_keys'] = split['train_keys']
