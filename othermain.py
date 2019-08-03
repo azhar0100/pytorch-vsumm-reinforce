@@ -44,6 +44,7 @@ parser = argparse.ArgumentParser("Pytorch code for unsupervised video summarizat
 # Dataset options
 parser.add_argument('-d', '--dataset-dir', type=str, help="path to h5 datasets (required)",default="datasets/")
 parser.add_argument('-t', '--train-sets' , type=str, default="stoy", help="Which of the 4 datasets to train on")
+parser.add_argument('--split-id', type=int, default=-1, help="split index (default: -1)")
 parser.add_argument('-m', '--metric', type=str, choices=['tvsum', 'summe'],
                     help="evaluation metric ['tvsum', 'summe']",default='summe')
 
