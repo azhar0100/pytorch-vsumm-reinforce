@@ -194,8 +194,8 @@ def othermain():
     if args.evaluate:
         print("Evaluate only")
         # evaluate(model, dataset, test_keys, use_gpu)
-        evaluate(model, datasets[abbrev_to_name.inv['summe']]['dataset'], datasets[abbrev_to_name.inv['summe']]['test_keys'], use_gpu, 'avg')
-        evaluate(model, datasets[abbrev_to_name.inv['tvsum']]['dataset'], datasets[abbrev_to_name.inv['tvsum']]['test_keys'], use_gpu, 'max')
+        evaluate(model, datasets[abbrev_to_name.inv['summe']]['dataset'], datasets[abbrev_to_name.inv['summe']]['test_keys'], use_gpu, 'max')
+        evaluate(model, datasets[abbrev_to_name.inv['tvsum']]['dataset'], datasets[abbrev_to_name.inv['tvsum']]['test_keys'], use_gpu, 'avg')
         return
     print("==> Start training")
     start_time = time.time()
