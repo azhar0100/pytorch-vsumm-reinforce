@@ -27,10 +27,10 @@ from vasnet_model import VASNet
 import yaml
 
 abbrev_to_name = {
-    'summe'  : 's',
-    'tvsum'  : 't',
-    'ovp'    : 'o',
-    'youtube': 'y'
+    's':'summe'  ,
+    't':'tvsum'  ,
+    'o':'ovp'    ,
+    'y':'youtube'
 }
 
 file_dict = {
@@ -140,14 +140,14 @@ def othermain():
     else:
         print("Currently using CPU")
 
-    print("Initialize dataset {}".format(args.dataset))
+    print("Initialize dataset {}".format(args.dataset_dir))
 
     datasets = {}
     for i in args.train_sets:
         d = {}
-        d['dataset'] = h5py.File(args.dataset_dir + "/" + file_dict[abbrev_to_name[i]] + ".h5",  'r')
+        d['dataset'] = h5py.File(args.dataset_dir + file_dict[abbrev_to_name[i]] + ".h5",  'r')
         d['num_videos'] = len(dataset.keys())
-        d['splits'] = read_json(args.dataset_dir + "/" + file_dict[abbrev_to_name[i]] + ".json")
+        d['splits'] = read_json(args.dataset_dir + file_dict[abbrev_to_name[i]] + ".json")
         assert args.split_id < len(splits), "split_id (got {}) exceeds {}".format(args.split_id, len(splits))
         d['split'] = splits[args.split_id]
         d['train_keys'] = split['train_keys']
