@@ -14,11 +14,7 @@ import torch.nn as nn
 import torch.backends.cudnn as cudnn
 from torch.optim import lr_scheduler
 from torch.distributions import Bernoulli
-<<<<<<< HEAD
 from ax import optimize
-=======
->>>>>>> 520fcb36a2f728bca78ddc5499d6308189258131
-
 import atexit
 
 from utils import Logger, read_json, write_json, save_checkpoint
