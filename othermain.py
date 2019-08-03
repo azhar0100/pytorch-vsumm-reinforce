@@ -16,22 +16,25 @@ from torch.optim import lr_scheduler
 from torch.distributions import Bernoulli
 from ax import optimize
 import atexit
+import random
 
 from utils import Logger, read_json, write_json, save_checkpoint
 from models import *
 from rewards import compute_reward
 import vsum_tools
 
+from bidict import bidict
+
 from vasnet_model import VASNet
 
 import yaml
 
-abbrev_to_name = {
+abbrev_to_name = bidict({
     's':'summe'  ,
     't':'tvsum'  ,
     'o':'ovp'    ,
     'y':'youtube'
-}
+})
 
 file_dict = {
     'summe'  : 'eccv16_dataset_summe_google_pool5',
@@ -47,6 +50,12 @@ parser.add_argument('-t', '--train-sets' , type=str, default="stoy", help="Which
 parser.add_argument('--split-id', type=int, default=-1, help="split index (default: -1)")
 parser.add_argument('-m', '--metric', type=str, choices=['tvsum', 'summe'],
                     help="evaluation metric ['tvsum', 'summe']",default='summe')
+
+# Model options
+parser.add_argument('--input-dim', type=int, default=1024, help="input dimension (default: 1024)")
+parser.add_argument('--hidden-dim', type=int, default=256, help="hidden unit dimension of DSN (default: 256)")
+parser.add_argument('--num-layers', type=int, default=1, help="number of RNN layers (default: 1)")
+parser.add_argument('--rnn-cell', type=str, default='lstm', help="RNN cell type (default: lstm)")
 
 # Optimization options
 parser.add_argument('--lr', type=float, default=1e-05, help="learning rate (default: 1e-05)")
@@ -149,19 +158,21 @@ def othermain():
         d['dataset'] = h5py.File(args.dataset_dir + file_dict[abbrev_to_name[i]] + ".h5",  'r')
         dataset = d['dataset']
         d['num_videos'] = len(dataset.keys())
+        num_videos = d['num_videos']
         d['splits'] = read_json(args.dataset_dir + file_dict[abbrev_to_name[i]] + ".json")
         splits = d['splits']
         assert args.split_id < len(splits), "split_id (got {}) exceeds {}".format(args.split_id, len(splits))
         d['split'] = splits[args.split_id]
+        split = d['split']
         d['train_keys'] = split['train_keys']
         d['test_keys'] = split['test_keys']
         datasets[i] = d
         print("# total videos {}. # train videos {}. # test videos {}".format(num_videos, len(d['train_keys']), len(d['test_keys'])))
+    print(random.shuffle(list(datasets.keys())))    
     print("Initialize model")
     model = DSN(in_dim=args.input_dim, hid_dim=args.hidden_dim, num_layers=args.num_layers, cell=args.rnn_cell)
     model = VASNet()
     print("Model size: {:.5f}M".format(sum(p.numel() for p in model.parameters())/1000000.0))
-    datasets.append(dataset)
 
     optimizer = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
     if args.stepsize > 0:
@@ -188,14 +199,16 @@ def othermain():
     start_time = time.time()
     model.train()
 
-    for i in np.random.shuffle(datasets.keys()):
+    keys = list(datasets.keys())
+    random.shuffle(keys)
+    for i in keys:
+        train_keys = datasets[i]['train_keys']
+        dataset = datasets[i]['dataset']
         datasets[i]['baselines'] = {key: 0. for key in train_keys} # baseline rewards for videos
         datasets[i]['reward_writers'] = {key: [] for key in train_keys} # record reward changes for each video
 
         baselines      = datasets[i]['baselines']
         reward_writers = datasets[i]['reward_writers']
-        train_keys = datasets[i]['train_keys']
-        dataset = datasets[i]['dataset']
 
         @atexit.register
         def exit_func():
@@ -247,8 +260,8 @@ def othermain():
             # except:
                 # print("The weird exception was encountered")
                 # pass
-    evaluate(model, dataset[file_dict['summe']], test_keys, use_gpu, 'avg')
-    evaluate(model, dataset[file_dict['tvsum']], test_keys, use_gpu, 'max')
+    evaluate(model, dataset[abbrev_to_name.inv['summe']], test_keys, use_gpu, 'avg')
+    evaluate(model, dataset[abbrev_to_name.inv['tvsum']], test_keys, use_gpu, 'max')
 
 if __name__ == '__main__':
     othermain()
