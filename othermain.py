@@ -26,6 +26,9 @@ import vsum_tools
 from bidict import bidict
 
 from vasnet_model import VASNet
+from ax.plot.contour import plot_contour
+from ax.plot.trace import optimization_trace_single_method
+from ax.service.managed_loop import optimize
 
 import yaml
 
@@ -134,8 +137,14 @@ def evaluate(model, dataset, test_keys, use_gpu,eval_metric=None):
     return mean_fm
 
 
-def othermain():
+def othermain(parameterization):
     # args = argparse.Namespace(evaluate=False,use_gpu=True,seed=1,args.dataset)
+
+    if parameterization['num_epochs'] is not None:
+        args.max_epoch = parameterization['num_epochs']
+
+    if parameterization['episode_num'] is not None:
+        args.num_episode = parameterization['episode_num']
 
     if not args.evaluate:
         sys.stdout = Logger(osp.join(args.save_dir, 'log_train.txt'))
@@ -263,8 +272,19 @@ def othermain():
             # except:
                 # print("The weird exception was encountered")
                 # pass
-    evaluate(model, datasets[abbrev_to_name.inv['summe']]['dataset'], datasets[abbrev_to_name.inv['summe']]['test_keys'], use_gpu, 'avg')
-    evaluate(model, datasets[abbrev_to_name.inv['tvsum']]['dataset'], datasets[abbrev_to_name.inv['tvsum']]['test_keys'], use_gpu, 'max')
+    m1 = evaluate(model, datasets[abbrev_to_name.inv['summe']]['dataset'], datasets[abbrev_to_name.inv['summe']]['test_keys'], use_gpu, 'avg')
+    m2 = evaluate(model, datasets[abbrev_to_name.inv['tvsum']]['dataset'], datasets[abbrev_to_name.inv['tvsum']]['test_keys'], use_gpu, 'max')
+    return {'accuracy' : m1 + m2}
 
 if __name__ == '__main__':
-    othermain()
+    best_parameters, values, experiment, model = optimize(
+        parameters=[
+            # {"name": "lr", "type": "range", "bounds": [1e-6, 0.4], "log_scale": True},
+            # {"name": "momentum", "type": "range", "bounds": [0.0, 1.0]},
+            {"name": "num_epochs", "type": "choice", "values" : list(range(60,150,20))},
+            {"name": "episode_num", "type": "choice", "values": list(range(5,26,5))},
+        ],
+        evaluation_function=othermain,
+        objective_name='accuracy',
+    )
+    # othermain()
