@@ -190,11 +190,13 @@ def othermain():
     if use_gpu:
         model = nn.DataParallel(model).cuda()
 
+
     if args.evaluate:
         print("Evaluate only")
-        evaluate(model, dataset, test_keys, use_gpu)
+        # evaluate(model, dataset, test_keys, use_gpu)
+        evaluate(model, datasets[abbrev_to_name.inv['summe']]['dataset'], datasets[abbrev_to_name.inv['summe']]['test_keys'], use_gpu, 'avg')
+        evaluate(model, datasets[abbrev_to_name.inv['tvsum']]['dataset'], datasets[abbrev_to_name.inv['tvsum']]['test_keys'], use_gpu, 'max')
         return
-
     print("==> Start training")
     start_time = time.time()
     model.train()
@@ -261,8 +263,8 @@ def othermain():
             # except:
                 # print("The weird exception was encountered")
                 # pass
-    evaluate(model, datasets[abbrev_to_name.inv['summe']], test_keys, use_gpu, 'avg')
-    evaluate(model, datasets[abbrev_to_name.inv['tvsum']], test_keys, use_gpu, 'max')
+    evaluate(model, datasets[abbrev_to_name.inv['summe']]['dataset'], datasets[abbrev_to_name.inv['summe']]['test_keys'], use_gpu, 'avg')
+    evaluate(model, datasets[abbrev_to_name.inv['tvsum']]['dataset'], datasets[abbrev_to_name.inv['tvsum']]['test_keys'], use_gpu, 'max')
 
 if __name__ == '__main__':
     othermain()
