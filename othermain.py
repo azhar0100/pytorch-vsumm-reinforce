@@ -125,7 +125,7 @@ def evaluate(model, dataset, test_keys, use_gpu,eval_metric=None):
 
 
 def othermain():
-    args = argparse.Namespace(evaluate=False,use_gpu=True,seed=1,args.dataset)
+    # args = argparse.Namespace(evaluate=False,use_gpu=True,seed=1,args.dataset)
 
     if not args.evaluate:
         sys.stdout = Logger(osp.join(args.save_dir, 'log_train.txt'))
@@ -134,13 +134,6 @@ def othermain():
     print("==========\nArgs:{}\n==========".format(args))
 
     if use_gpu:
-        print("Currently using GPU {}".format(args.gpu))
-        cudnn.benchmark = True
-        torch.cuda.manual_seed_all(args.seed)
-    else:
-        print("Currently using CPU")
-
-        if use_gpu:
         print("Currently using GPU {}".format(args.gpu))
         cudnn.benchmark = True
         torch.cuda.manual_seed_all(args.seed)
