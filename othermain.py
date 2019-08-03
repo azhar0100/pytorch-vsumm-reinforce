@@ -261,7 +261,7 @@ def othermain(parameterization):
 
                 optimizer.zero_grad()
                 cost.backward()
-                torch.nn.utils.clip_grad_norm_(model.parameters(), 5.0)
+                torch.nn.utils.clip_grad_norm_(model.parameters(), 100.0)
                 optimizer.step()
                 datasets[i]['baselines'][key] = 0.9 * datasets[i]['baselines'][key] + 0.1 * np.mean(epis_rewards) # update baseline reward via moving average
                 datasets[i]['reward_writers'][key].append(np.mean(epis_rewards))
