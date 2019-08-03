@@ -14,7 +14,10 @@ import torch.nn as nn
 import torch.backends.cudnn as cudnn
 from torch.optim import lr_scheduler
 from torch.distributions import Bernoulli
+<<<<<<< HEAD
 from ax import optimize
+=======
+>>>>>>> 520fcb36a2f728bca78ddc5499d6308189258131
 
 import atexit
 
@@ -254,7 +257,6 @@ def othermain():
                 # pass
     evaluate(model, dataset[file_dict['summe']], test_keys, use_gpu, 'avg')
     evaluate(model, dataset[file_dict['tvsum']], test_keys, use_gpu, 'max')
-
 
 if __name__ == '__main__':
     othermain()
