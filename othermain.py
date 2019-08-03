@@ -200,8 +200,9 @@ def othermain():
     model.train()
 
     keys = list(datasets.keys())
-    random.shuffle(keys)
+    keys.sorted(key=lambda x:"stoy".index(x))
     for i in keys:
+        print("Training on dataset ==> {}".format(abbrev_to_name[i]))
         train_keys = datasets[i]['train_keys']
         dataset = datasets[i]['dataset']
         datasets[i]['baselines'] = {key: 0. for key in train_keys} # baseline rewards for videos
@@ -260,8 +261,8 @@ def othermain():
             # except:
                 # print("The weird exception was encountered")
                 # pass
-    evaluate(model, dataset[abbrev_to_name.inv['summe']], test_keys, use_gpu, 'avg')
-    evaluate(model, dataset[abbrev_to_name.inv['tvsum']], test_keys, use_gpu, 'max')
+    evaluate(model, datasets[abbrev_to_name.inv['summe']], test_keys, use_gpu, 'avg')
+    evaluate(model, datasets[abbrev_to_name.inv['tvsum']], test_keys, use_gpu, 'max')
 
 if __name__ == '__main__':
     othermain()
