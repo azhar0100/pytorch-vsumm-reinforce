@@ -93,7 +93,8 @@ def evaluate(model, dataset, test_keys, use_gpu,eval_metric=None):
         model.eval()
         fms = []
         if eval_metric is None:
-            eval_metric = 'avg' if args.metric == 'tvsum' else 'max'
+            args.metric = eval_metric
+        eval_metric = 'avg' if args.metric == 'tvsum' else 'max'
 
         if args.verbose: table = [["No.", "Video", "F-score"]]
 
@@ -272,8 +273,8 @@ def othermain(parameterization):
             # except:
                 # print("The weird exception was encountered")
                 # pass
-    m1 = evaluate(model, datasets[abbrev_to_name.inv['summe']]['dataset'], datasets[abbrev_to_name.inv['summe']]['test_keys'], use_gpu, 'avg')
-    m2 = evaluate(model, datasets[abbrev_to_name.inv['tvsum']]['dataset'], datasets[abbrev_to_name.inv['tvsum']]['test_keys'], use_gpu, 'max')
+    m1 = evaluate(model, datasets[abbrev_to_name.inv['summe']]['dataset'], datasets[abbrev_to_name.inv['summe']]['test_keys'], use_gpu, 'summe')
+    m2 = evaluate(model, datasets[abbrev_to_name.inv['tvsum']]['dataset'], datasets[abbrev_to_name.inv['tvsum']]['test_keys'], use_gpu, 'tvsum')
     return {'accuracy' : m1 + m2}
 
 if __name__ == '__main__':
