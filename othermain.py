@@ -146,6 +146,7 @@ def othermain():
     for i in args.train_sets:
         d = {}
         d['dataset'] = h5py.File(args.dataset_dir + file_dict[abbrev_to_name[i]] + ".h5",  'r')
+        dataset = d['dataset']
         d['num_videos'] = len(dataset.keys())
         d['splits'] = read_json(args.dataset_dir + file_dict[abbrev_to_name[i]] + ".json")
         assert args.split_id < len(splits), "split_id (got {}) exceeds {}".format(args.split_id, len(splits))
