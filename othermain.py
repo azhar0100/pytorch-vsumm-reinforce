@@ -200,7 +200,7 @@ def othermain():
     model.train()
 
     keys = list(datasets.keys())
-    keys.sorted(key=lambda x:"stoy".index(x))
+    keys = sorted(keys,key=lambda x:"oyst".index(x))
     for i in keys:
         print("Training on dataset ==> {}".format(abbrev_to_name[i]))
         train_keys = datasets[i]['train_keys']
