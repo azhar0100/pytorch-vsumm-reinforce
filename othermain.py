@@ -42,9 +42,9 @@ file_dict = {
 
 parser = argparse.ArgumentParser("Pytorch code for unsupervised video summarization with REINFORCE")
 # Dataset options
-parser.add_argument('-d', '--dataset-dir', type=str, required=True, help="path to h5 datasets (required)",default="datasets/")
-parser.add_argument('-t', '--train-sets' , type=str, required=True, default="stoy", help="Which of the 4 datasets to train on")
-parser.add_argument('-m', '--metric', type=str, required=True, choices=['tvsum', 'summe'],
+parser.add_argument('-d', '--dataset-dir', type=str, help="path to h5 datasets (required)",default="datasets/")
+parser.add_argument('-t', '--train-sets' , type=str, default="stoy", help="Which of the 4 datasets to train on")
+parser.add_argument('-m', '--metric', type=str, choices=['tvsum', 'summe'],
                     help="evaluation metric ['tvsum', 'summe']",default='summe')
 
 # Optimization options
